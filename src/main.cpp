@@ -4,8 +4,6 @@
 #include <iostream>
 
 int main(){
-    //Termbox().run();
-    Maze m(4,4);
-    m.printMaze();
+    Termbox().run();
     return 0;
 }
