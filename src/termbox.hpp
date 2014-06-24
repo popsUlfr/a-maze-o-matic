@@ -12,7 +12,7 @@ public:
 private:
     void drawScreen();
     void drawRectangle(int tlx,int tly,int brx,int bry,uint16_t color);
-    void generateMaze();
+    void drawMaze(int tlx,int tly,int brx,int bry,uint16_t color);
 };
 
 class TermboxInitException: public std::runtime_error{

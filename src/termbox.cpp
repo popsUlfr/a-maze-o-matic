@@ -1,10 +1,9 @@
 #include "termbox.hpp"
+#include "maze.hpp"
 
 #include <termbox.h>
 
 #include <iostream>
-#include <random>
-#include <ctime>
 
 std::string TermboxInitException::errorStringPrinter(int code){
     std::string s;
@@ -39,15 +38,34 @@ Termbox::~Termbox(){
     tb_shutdown();
 }
 
+void Termbox::drawMaze(int tlx, int tly, int brx, int bry, uint16_t color){
+    int width=brx-tlx;
+    int height=bry-tly;
+    Maze m((unsigned int)(width>>1),(unsigned int)(height>>1));
+    for(int y=tly+1;y<bry;y+=2){
+        for(int x=tlx+1;x<brx;x+=2){
+            Maze::Cell& c=m.getCellAt((x==width-1)?(x-1)>>1:x>>1,(y==height-1)?(y-1)>>1:y>>1);
+            if(m.hasWallN(c) || m.hasBorderN(c))
+                tb_change_cell(x,y-1,0,TB_DEFAULT,color);
+            if(m.hasWallE(c) || m.hasBorderE(c))
+                tb_change_cell(x+1,y,0,TB_DEFAULT,color);
+            if(m.hasWallS(c) || m.hasBorderS(c))
+                tb_change_cell(x,y-1,0,TB_DEFAULT,color);
+            if(m.hasWallW(c) || m.hasBorderW(c))
+                tb_change_cell(x-1,y,0,TB_DEFAULT,color);
+        }
+    }
+}
+
+
 void Termbox::drawScreen(){
     static const int margin=4;
     tb_clear(); // We clear the whole screen
     tb_select_output_mode(TB_OUTPUT_NORMAL); // 8 colors mode
     int width=tb_width();
     int height=tb_height();
-    if((width-(margin<<1))>0 &&
-        (height-(margin<<1))>0){
-        drawRectangle(margin,margin,width-margin,height-margin,TB_CYAN);
+    if(width>16 && height>16){
+        drawMaze(0,0,40,40,TB_CYAN);
     }
     tb_present();
 }
@@ -61,28 +79,6 @@ void Termbox::drawRectangle(int tlx,int tly,int brx,int bry, uint16_t color){
         }
     }
 }
-
-void Termbox::generateMaze(){
-    int width=tb_width();
-    int height=tb_height();
-    std::default_random_engine re(std::time(0));
-    std::uniform_int_distribution<int> unintWidth(0,width);
-    std::uniform_int_distribution<int> unintHeight(0,height);
-    int x=unintWidth(re);
-    int y=unintHeight(re);
-    
-    const int nbcells=8;
-    struct tb_cell *ncells[nbcells];
-    
-    
-    if(x>0 && y>0){ // North West
-        tb_blit();
-    }
-    
-}
-
-
-
 
 void Termbox::run(){
     drawScreen();

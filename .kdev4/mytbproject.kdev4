@@ -26,3 +26,6 @@ Start With=ApplicationOutput
 Use External Terminal=true
 Working Directory=
 isExecutable=true
+
+[Project]
+VersionControlSupport=kdevgit
