@@ -39,6 +39,25 @@ Termbox::~Termbox(){
     tb_shutdown();
 }
 
+typedef enum{
+    DIR_NONE,
+    DIR_HORZ,
+    DIR_HORZ_RIGHT,
+    DIR_HORZ_LEFT,
+    DIR_VERT,
+    DIR_VERT_UP,
+    DIR_VERT_DOWN,
+    DIR_LEFT_UP,
+    DIR_RIGHT_UP,
+    DIR_LEFT_UP_RIGHT,
+    DIR_LEFT_DOWN,
+    DIR_RIGHT_DOWN,
+    DIR_LEFT_DOWN_RIGHT,
+    DIR_UP_LEFT_DOWN,
+    DIR_UP_RIGHT_DOWN,
+    DIR_LEFT_UP_RIGHT_DOWN
+}CornerDir;
+
 void Termbox::drawMaze(int tlx, int tly, int brx, int bry, uint16_t color){
     delete(_maze); // we free the old maze
     _maze=new Maze((unsigned int)((brx-tlx)>>2),(unsigned int)((bry-tly)>>1)); // we shift twice the width to account for 2 more -
@@ -114,87 +133,94 @@ void Termbox::drawMaze(int tlx, int tly, int brx, int bry, uint16_t color){
                 else
                     tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x2503,color,TB_DEFAULT);
             }
-        }
-    }
-}
-
-/*
-void Termbox::drawMaze(int tlx, int tly, int brx, int bry, uint16_t color){
-    delete(_maze);
-    _maze=new Maze((unsigned int)((brx-tlx)>>2),(unsigned int)((bry-tly)>>1));
-    unsigned int x;
-    for(x=0;x<_maze->getWidth();++x){
-        if(x==0)
-            tb_change_cell(tlx+(x<<1),tly,0x250F,color,TB_DEFAULT);
-        tb_change_cell(tlx+(x<<2)+1,tly,0x2501,color,TB_DEFAULT);
-        tb_change_cell(tlx+(x<<2)+2,tly,0x2501,color,TB_DEFAULT);
-        tb_change_cell(tlx+(x<<2)+3,tly,0x2501,color,TB_DEFAULT);
-        if(x==_maze->getWidth()-1)
-            tb_change_cell(tlx+(x<<2)+4,tly,0x2513,color,TB_DEFAULT);
-        else{
-            if(_maze->hasWallE(_maze->getCellAt(x,0)))
-                tb_change_cell(tlx+(x<<2)+4,tly,0x2533,color,TB_DEFAULT);
-            else
-                tb_change_cell(tlx+(x<<2)+4,tly,0x2501,color,TB_DEFAULT);
-        }
-    }
-    for(unsigned y=0;y<_maze->getHeight();++y){
-        for(x=0;x<_maze->getWidth();++x){
-            if(x==0)
-                tb_change_cell(tlx+(x<<2),tly+(y<<1)+1,0x2503,color,TB_DEFAULT);
-            // Cell space
-            if(_maze->hasWallE(_maze->getCellAt(x,y)))
-                tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+1,0x2503,color,TB_DEFAULT);
-            // small space
-        }
-        for(x=0;x<_maze->getWidth();++x){
-            if(x==0){
-                if(y==_maze->getHeight()-1)
-                    tb_change_cell(tlx+(x<<1),tly+(y<<1)+2,0x2517,color,TB_DEFAULT);
-                else{
-                    if(_maze->hasWallS(_maze->getCellAt(x,y)))
-                        tb_change_cell(tlx+(x<<1),tly+(y<<1)+2,0x2523,color,TB_DEFAULT);
-                    else
-                        tb_change_cell(tlx+(x<<1),tly+(y<<1)+2,0x2503,color,TB_DEFAULT);
-                }
-            }
-            Maze::Cell &c=_maze->getCellAt(x,y);
-            if(_maze->hasWallS(c) || _maze->hasBorderS(c)){
-                tb_change_cell(tlx+(x<<2)+1,tly+(y<<1)+2,0x2501,color,TB_DEFAULT);
-                tb_change_cell(tlx+(x<<2)+2,tly+(y<<1)+2,0x2501,color,TB_DEFAULT);
-                tb_change_cell(tlx+(x<<2)+3,tly+(y<<1)+2,0x2501,color,TB_DEFAULT);
-            }
-            // Cell space
+            CornerDir cd=DIR_NONE;
             int pos;
-            if(_maze->hasWallS(c) || _maze->hasBorderS(c)){
-                if(_maze->hasWallE(c) || _maze->hasBorderE(c)){
-                    if((pos=_maze->cellEPos((y*_maze->getWidth())+x))>0){
-                        if(_maze->hasWallS(_maze->getCellAt(pos%_maze->getWidth(),pos/_maze->getWidth()))){
-                            if((((pos=_maze->cellSPos(pos))>0)
-                                && (_maze->hasWallW(_maze->getCellAt(pos%_maze->getWidth(),pos/_maze->getWidth()))))
-                                || (((pos=_maze->cellSPos((y*_maze->getWidth())+x))>0)
-                                && (_maze->hasWallE(_maze->getCellAt(pos%_maze->getWidth(),pos/_maze->getWidth()))))){
-                                tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x254B,color,TB_DEFAULT);
-                                }
-                                else
-                                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x253B,color,TB_DEFAULT);
-                        }
-                        else
-                            tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x251B,color,TB_DEFAULT);
-                    }
-                    else
-                        tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x252B,color,TB_DEFAULT);
-                }
+            if(_maze->hasWallS(c) || _maze->hasBorderS(c))
+                cd=DIR_HORZ_LEFT;
+            if(_maze->hasWallE(c) || _maze->hasBorderE(c)){
+                if(cd==DIR_HORZ_LEFT)
+                    cd=DIR_LEFT_UP;
                 else
-                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x2501,color,TB_DEFAULT);
+                    cd=DIR_VERT_DOWN;
+            }
+            if((pos=_maze->cellEPos((y*_maze->getWidth())+x))>0){
+                if(_maze->hasWallS(_maze->getCellByPos(pos)) || _maze->hasBorderS(_maze->getCellByPos(pos))){
+                    if(cd==DIR_LEFT_UP)
+                        cd=DIR_LEFT_UP_RIGHT;
+                    else if(cd==DIR_VERT_DOWN)
+                        cd=DIR_RIGHT_UP;
+                    else if(cd==DIR_HORZ_LEFT)
+                        cd=DIR_HORZ;
+                    else
+                        cd=DIR_HORZ_RIGHT;
+                }
             }
             else
-                tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x2501,color,TB_DEFAULT);
+                cd=DIR_NONE;
+            if((pos=_maze->cellSPos((y*_maze->getWidth())+x))>0){
+                if(_maze->hasWallE(_maze->getCellByPos(pos)) || _maze->hasBorderE(_maze->getCellByPos(pos))){
+                    if(cd==DIR_LEFT_UP_RIGHT)
+                        cd=DIR_LEFT_UP_RIGHT_DOWN;
+                    else if(cd==DIR_LEFT_UP)
+                        cd=DIR_UP_LEFT_DOWN;
+                    else if(cd==DIR_RIGHT_UP)
+                        cd=DIR_UP_RIGHT_DOWN;
+                    else if(cd==DIR_HORZ_LEFT)
+                        cd=DIR_LEFT_DOWN;
+                    else if(cd==DIR_HORZ_RIGHT)
+                        cd=DIR_RIGHT_DOWN;
+                    else if(cd==DIR_HORZ)
+                        cd=DIR_LEFT_DOWN_RIGHT;
+                    else
+                        cd=DIR_VERT_UP;
+                }
+            }
+            else
+                cd=DIR_NONE;
+            
+            switch(cd){
+                case DIR_HORZ:
+                case DIR_HORZ_RIGHT:
+                case DIR_HORZ_LEFT:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x2501,color,TB_DEFAULT);
+                    break;
+                case DIR_VERT:
+                case DIR_VERT_UP:
+                case DIR_VERT_DOWN:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x2503,color,TB_DEFAULT);
+                    break;
+                case DIR_LEFT_UP:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x251B,color,TB_DEFAULT);
+                    break;
+                case DIR_RIGHT_UP:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x2517,color,TB_DEFAULT);
+                    break;
+                case DIR_LEFT_UP_RIGHT:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x253B,color,TB_DEFAULT);
+                    break;
+                case DIR_LEFT_DOWN:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x2513,color,TB_DEFAULT);
+                    break;
+                case DIR_RIGHT_DOWN:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x250F,color,TB_DEFAULT);
+                    break;
+                case DIR_LEFT_DOWN_RIGHT:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x2533,color,TB_DEFAULT);
+                    break;
+                case DIR_UP_LEFT_DOWN:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x252B,color,TB_DEFAULT);
+                    break;
+                case DIR_UP_RIGHT_DOWN:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x2523,color,TB_DEFAULT);
+                    break;
+                case DIR_LEFT_UP_RIGHT_DOWN:
+                    tb_change_cell(tlx+(x<<2)+4,tly+(y<<1)+2,0x254B,color,TB_DEFAULT);
+                    break;
+                default: ;
+            }
         }
     }
 }
-
-*/
 
 
 void Termbox::drawScreen(){
