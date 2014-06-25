@@ -1,13 +1,10 @@
 #include "termbox.hpp"
-#include "maze.hpp"
+#include "mazegame.hpp"
 
 #include <iostream>
 
-void termboxThread(){
-    Termbox().run();
-}
-
 int main(){
-    termboxThread();
+    Termbox tb;
+    MazeGame(tb).run();
     return 0;
 }

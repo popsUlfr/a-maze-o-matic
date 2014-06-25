@@ -37,14 +37,19 @@ public:
     Maze(unsigned int width, unsigned int height);
     virtual ~Maze(){}
     
-    unsigned int getWidth(){return _width;}
-    unsigned int getHeight(){return _height;}
+    unsigned int getWidth() const{return _width;}
+    unsigned int getHeight() const{return _height;}
     
     Cell& getCellAt(unsigned int x,unsigned int y){
         return _map.at(coordToPos(x,y));
     }
-    
+    Cell getCellAt(unsigned int x,unsigned int y) const{
+        return _map.at(coordToPos(x,y));
+    }
     Cell& getCellByPos(unsigned int i){
+        return _map.at(i);
+    }
+    Cell getCellByPos(unsigned int i) const{
         return _map.at(i);
     }
     static bool hasWallN(Cell c){return (c & MAZE_WALL_NORTH)==MAZE_WALL_NORTH;}
