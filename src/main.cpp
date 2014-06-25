@@ -3,7 +3,11 @@
 
 #include <iostream>
 
-int main(){
+void termboxThread(){
     Termbox().run();
+}
+
+int main(){
+    termboxThread();
     return 0;
 }

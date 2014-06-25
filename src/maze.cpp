@@ -1,11 +1,10 @@
 #include "maze.hpp"
 
-#include <ctime>
 #include <stack>
 #include <random>
 #include <iostream>
 
-unsigned int Maze::fillNeighbours(unsigned int pos, unsigned int nbCells[4]){
+unsigned int Maze::fillNeighbours(unsigned int pos, unsigned int nbCells[4]) const{
     unsigned int cells=0;
     int tmp;
     if((tmp=cellNPos(pos))>=0 && ((_map.at(tmp) & MAZE_WALL_ALL)==MAZE_WALL_ALL))
