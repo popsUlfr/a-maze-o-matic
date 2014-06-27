@@ -30,7 +30,3 @@ Termbox::Termbox(){
     if((ret=tb_init())<0) throw TermboxInitException(ret);
     tb_select_output_mode(TB_OUTPUT_NORMAL);
 }
-
-Termbox::~Termbox(){
-    tb_shutdown();
-}

@@ -1,4 +1,5 @@
 #include "mazeplayground.hpp"
+#include "actor.hpp"
 
 #include <random>
 
@@ -9,12 +10,18 @@ void MazePlayground::posRandomizer(){
     unsigned int edge=uniDistEdge(rd);
     if((edge%2)==0){
         std::uniform_int_distribution<unsigned int> uniDistWidth(0,_maze.getWidth()-1);
-        _currPos=_prevPos=_start=_maze.coordToPos(uniDistWidth(rd),(edge==0)?0:_maze.getHeight()-1);
+        _start=_maze.coordToPos(uniDistWidth(rd),(edge==0)?0:_maze.getHeight()-1);
         _end=_maze.coordToPos(uniDistWidth(rd),(edge==0)?_maze.getHeight()-1:0);
     }
     else{
         std::uniform_int_distribution<unsigned int> uniDistHeight(0,_maze.getHeight()-1);
-        _currPos=_prevPos=_start=_maze.coordToPos((edge==1)?0:_maze.getWidth()-1,uniDistHeight(rd));
+        _start=_maze.coordToPos((edge==1)?0:_maze.getWidth()-1,uniDistHeight(rd));
         _end=_maze.coordToPos((edge==1)?_maze.getWidth()-1:0,uniDistHeight(rd));
+    }
+}
+
+void MazePlayground::addActor(Actor* actor){
+    if(actor!=nullptr){
+        actor->resetPosition(getPosStart());
     }
 }

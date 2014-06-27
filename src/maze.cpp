@@ -59,12 +59,13 @@ void Maze::depthFirstSearchAlgorithm(){
     std::stack<unsigned int> vecPosStack;
     unsigned int nbCells[4];
     
+    std::uniform_int_distribution<unsigned int> unintNb(0,3);
+    
     for(;visitedCells<totalCells-1;){
         fillBorders(pos);
         unsigned int cells;
         if((cells=fillNeighbours(pos,nbCells))>0){
-            std::uniform_int_distribution<unsigned int> unintNb(0,cells-1);
-            unsigned int newpos=nbCells[unintNb(re)];
+            unsigned int newpos=nbCells[unintNb(re)%cells];
             knockDownWall(pos,newpos);
             vecPosStack.push(pos);
             pos=newpos;
@@ -76,13 +77,6 @@ void Maze::depthFirstSearchAlgorithm(){
             vecPosStack.pop();
         }
     }
-}
-
-Maze::Maze(unsigned int width, unsigned int height):
-_width(width),_height(height),
-_map(width*height,MAZE_WALL_ALL)
-{
-    depthFirstSearchAlgorithm();
 }
 
 void Maze::printMaze(){

@@ -1,12 +1,15 @@
 #ifndef _AI_HPP
 #define _AI_HPP
 
-#include "mazeplayground.hpp"
+class MazePlayground;
+class Actor;
 
 class AI{
 public:
-    AI(const MazePlayground &mp):_mp(mp){}
-protected:
-    const MazePlayground &_mp;
+    AI(){}
+    virtual ~AI(){}
+    
+    virtual void run(const MazePlayground* mp,Actor* actor)=0;
+    virtual void stop()=0;
 };
 #endif

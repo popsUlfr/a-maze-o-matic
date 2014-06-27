@@ -3,43 +3,67 @@
 #include "mazedrawer.hpp"
 #include "mazeplayground.hpp"
 #include "maze.hpp"
+#include "aihuman.hpp"
+#include "actor.hpp"
 
 const int MazeGame::MazeMargin=4;
 const int MazeGame::MinimalScreenSize=8;
 
-MazeGame::~MazeGame(){
-    delete(_mp);
-    delete(_maze);
+MazeGame::MazeGame(Termbox &tb):
+_tb(tb),
+_maze(nullptr),
+_mp(nullptr),
+_humanAI(/*tb*/),
+_player(&_humanAI){
+    _player.attachObserver(this);
 }
 
-void MazeGame::drawScreen(){
-    _tb.clear(); // We clear the whole screen
+void MazeGame::deleteMaze(){
+    if(_mp!=nullptr) delete(_mp);
+    if(_maze!=nullptr) delete(_maze);
+}
+
+MazeGame::~MazeGame(){
+    deleteMaze();
+}
+
+void MazeGame::createMaze(){
+    _tb.clear();
     int width=_tb.width();
     int height=_tb.height();
     if((width-((MazeMargin<<1)+MinimalScreenSize))>0 &&
         (height-((MazeMargin<<1)+MinimalScreenSize))>0
     ){
-        delete(_mp);
-        delete(_maze);
-        _maze=new Maze(MazeDrawer::targetMazeWidth(width-(MazeMargin<<1)),MazeDrawer::targetMazeHeight(height-(MazeMargin<<1)));
+        deleteMaze();
+        _maze=new Maze(MazeDrawer::targetMazeWidth(width-(MazeMargin<<1)),
+                       MazeDrawer::targetMazeHeight(height-(MazeMargin<<1)));
         _mp=new MazePlayground(*_maze);
+        _mp->addActor(&_player);
         MazeDrawer::drawMaze(_tb,*_maze,MazeMargin,MazeMargin);
         MazeDrawer::drawEntryPoints(_tb,*_mp,MazeMargin,MazeMargin);
     }
     _tb.present();
 }
 
-void MazeGame::updatePlayer(){
+void MazeGame::update(){
     MazeDrawer::clearCell(_tb,MazeMargin,MazeMargin,
-                          _maze->posToCoordX(_mp->getPrevPos()),
-                          _maze->posToCoordY(_mp->getPrevPos()));
+                          _maze->posToCoordX(_player.getPrevPosition()),
+                          _maze->posToCoordY(_player.getPrevPosition()));
     MazeDrawer::drawPlayer(_tb,MazeMargin,MazeMargin,
-                           _maze->posToCoordX(_mp->getCurrPos()),
-                           _maze->posToCoordY(_mp->getCurrPos())
+                           _maze->posToCoordX(_player.getPosition()),
+                           _maze->posToCoordY(_player.getPosition())
                           );
     _tb.present();
 }
 
+void MazeGame::run(){
+    createMaze();
+    update();
+    _player.run(_mp);
+}
+
+
+/*
 void MazeGame::keyHandler(uint16_t key){
     switch(key){
         case TB_KEY_SPACE:
@@ -89,4 +113,5 @@ void MazeGame::run(){
         }
     }
 }
+*/
 

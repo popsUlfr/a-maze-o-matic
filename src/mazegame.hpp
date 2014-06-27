@@ -2,23 +2,34 @@
 #define _MAZEGAME_HPP
 
 #include "termbox.hpp"
-#include "maze.hpp"
-#include "mazeplayground.hpp"
+#include "actor.hpp"
+#include "aicpu.hpp"
 
-class MazeGame{
+#include "observer.hpp"
+
+class Maze;
+class MazePlayground;
+class Actor;
+class AI;
+
+class MazeGame:public Observer{
 public:
     static const int MazeMargin;
     static const int MinimalScreenSize;
-    MazeGame(Termbox &tb):_tb(tb),_maze(nullptr),_mp(nullptr){}
-    ~MazeGame();
-    void run();
+    MazeGame(Termbox &tb);
+    virtual ~MazeGame();
+    virtual void run();
+    
+    virtual void update();
     
 protected:
-    void keyHandler(uint16_t key);
-    void drawScreen();
-    void updatePlayer();
+    virtual void createMaze();
+    virtual void deleteMaze();
+    
     Termbox &_tb;
     Maze* _maze;
     MazePlayground* _mp;
+    AICpu _humanAI;
+    Actor _player;
 };
 #endif

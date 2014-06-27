@@ -9,9 +9,7 @@
 #define MAZE_DEFAULT_PLAYER_SYMBOL 0x263B
 
 class MazeDrawer{
-public:
-    MazeDrawer(){}
-    
+public:    
     static unsigned int realWidth(const Maze& maze){return (maze.getWidth()<<2)+1;}
     static unsigned int realHeight(const Maze& maze){return (maze.getHeight()<<1)+1;}
     
@@ -100,6 +98,9 @@ public:
     static const uint32_t DoorSymbols[];
     
 protected:
+    MazeDrawer(){}
+    virtual ~MazeDrawer(){}
+    
     static void drawPrettyJunctions(const Termbox& tb,
                                     const Maze& maze,
                                     int tlx,

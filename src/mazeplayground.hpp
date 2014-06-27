@@ -3,80 +3,53 @@
 
 #include "maze.hpp"
 
+class Actor;
+
 class MazePlayground{
 public:
-    MazePlayground(Maze &maze):_maze(maze){posRandomizer();}
-    Maze& getMaze() const{return _maze;}
+    explicit MazePlayground(const Maze &maze):_maze(maze){posRandomizer();}
+    MazePlayground(const MazePlayground& mp):
+    _maze(mp._maze),_start(mp._start),_end(mp._end){}
+    virtual ~MazePlayground(){}
     
-    void posRandomizer();
-    unsigned int getPosStart() const{return _start;}
-    unsigned int getPosEnd() const{return _end;}
-    unsigned int getCurrPos() const{return _currPos;}
-    unsigned int getPrevPos() const{return _prevPos;}
+    virtual const Maze& getMaze() const{return _maze;}
     
-    bool collisionN(unsigned int x,unsigned int y) const{
-        return _maze.hasWallN(_maze.getCellAt(x,y)) ||
-        _maze.hasBorderN(_maze.getCellAt(x,y));
-    }
-    bool collisionE(unsigned int x,unsigned int y) const{
-        return _maze.hasWallE(_maze.getCellAt(x,y)) ||
-        _maze.hasBorderE(_maze.getCellAt(x,y));
-    }
-    bool collisionS(unsigned int x,unsigned int y) const{
-        return _maze.hasWallS(_maze.getCellAt(x,y)) ||
-        _maze.hasBorderS(_maze.getCellAt(x,y));
-    }
-    bool collisionW(unsigned int x,unsigned int y) const{
-        return _maze.hasWallW(_maze.getCellAt(x,y)) ||
-        _maze.hasBorderW(_maze.getCellAt(x,y));
-    }
+    virtual void posRandomizer();
+    virtual unsigned int getPosStart() const{return _start;}
+    virtual unsigned int getPosEnd() const{return _end;}
     
-    bool movePlayerN() {
-        int pos;
-        if(!collisionN(_maze.posToCoordX(_currPos),_maze.posToCoordY(_currPos)) &&
-                (pos=_maze.cellNPos(_currPos))>=0) {
-            _prevPos=_currPos; _currPos=pos;
-            return true;
-        }
-        else
-            return false;
-    }
-    bool movePlayerE() {
-        int pos;
-        if(!collisionE(_maze.posToCoordX(_currPos),_maze.posToCoordY(_currPos)) &&
-                (pos=_maze.cellEPos(_currPos))>=0) {
-            _prevPos=_currPos; _currPos=pos;
-            return true;
-        }
-        else
-            return false;
-    }
-    bool movePlayerS() {
-        int pos;
-        if(!collisionS(_maze.posToCoordX(_currPos),_maze.posToCoordY(_currPos)) &&
-                (pos=_maze.cellSPos(_currPos))>=0) {
-            _prevPos=_currPos; _currPos=pos;
-            return true;
-        }
-        else
-            return false;
-    }
-    bool movePlayerW() {
-        int pos;
-        if(!collisionW(_maze.posToCoordX(_currPos),_maze.posToCoordY(_currPos)) &&
-                (pos=_maze.cellWPos(_currPos))>=0) {
-            _prevPos=_currPos; _currPos=pos;
-            return true;
-        }
-        else
-            return false;
-    }
+    virtual void addActor(Actor *actor);
     
+    virtual bool collisionNCell(Maze::Cell c) const{
+        return _maze.hasWallN(c) ||
+        _maze.hasBorderN(c);
+    }
+    virtual bool collisionN(unsigned int pos) const{return collisionNCell(_maze.getCellByPos(pos));}
+    virtual bool collisionN(unsigned int x,unsigned int y) const{return collisionNCell(_maze.getCellAt(x,y));}
+    
+    virtual bool collisionECell(Maze::Cell c) const{
+        return _maze.hasWallE(c) ||
+        _maze.hasBorderE(c);
+    }
+    virtual bool collisionE(unsigned int pos) const{return collisionECell(_maze.getCellByPos(pos));}
+    virtual bool collisionE(unsigned int x,unsigned int y) const{return collisionECell(_maze.getCellAt(x,y));}
+    
+    virtual bool collisionSCell(Maze::Cell c) const{
+        return _maze.hasWallS(c) ||
+        _maze.hasBorderS(c);
+    }
+    virtual bool collisionS(unsigned int pos) const{return collisionSCell(_maze.getCellByPos(pos));}
+    virtual bool collisionS(unsigned int x,unsigned int y) const{return collisionSCell(_maze.getCellAt(x,y));}
+    
+    virtual bool collisionWCell(Maze::Cell c) const{
+        return _maze.hasWallW(c) ||
+        _maze.hasBorderW(c);
+    }
+    virtual bool collisionW(unsigned int pos) const{return collisionWCell(_maze.getCellByPos(pos));}
+    virtual bool collisionW(unsigned int x,unsigned int y) const{return collisionWCell(_maze.getCellAt(x,y));}
 protected:
-    Maze &_maze;
+    const Maze &_maze;
     unsigned int _start;
     unsigned int _end;
-    unsigned int _prevPos;
-    unsigned int _currPos;
 };
 #endif

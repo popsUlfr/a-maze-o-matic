@@ -9,24 +9,24 @@
 class Termbox{
 public:
     explicit Termbox();
-    virtual ~Termbox();
+    virtual ~Termbox(){tb_shutdown();}
     
-    int width() const{return tb_width();}
-    int height() const{return tb_height();}
+    virtual int width() const{return tb_width();}
+    virtual int height() const{return tb_height();}
     
     /**
      * See termbox.h for color codes
      */
-    void change_cell(int x,int y,uint32_t ch, uint16_t fg, uint16_t bg) const{tb_change_cell(x,y,ch,fg,bg);}
+    virtual void change_cell(int x,int y,uint32_t ch, uint16_t fg, uint16_t bg) const{tb_change_cell(x,y,ch,fg,bg);}
     
-    void clear() const{tb_clear();}
+    virtual void clear() const{tb_clear();}
     
-    void present() const{tb_present();}
+    virtual void present() const{tb_present();}
     
-    int peek_event(struct tb_event *event, int timeout){
+    virtual int peek_event(struct tb_event *event, int timeout) const{
         return tb_peek_event(event,timeout);
     }
-    int poll_event(struct tb_event *event){
+    virtual int poll_event(struct tb_event *event) const{
         return tb_poll_event(event);
     }
 };
@@ -37,7 +37,7 @@ public:
     runtime_error(TermboxInitException::errorStringCreator(code)),
     _code(code){}
     static std::string errorStringCreator(int code);
-    int getErrorCode(){return _code;}
+    virtual int getErrorCode(){return _code;}
 private:
     int _code;
 };

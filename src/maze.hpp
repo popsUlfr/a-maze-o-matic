@@ -34,22 +34,29 @@ public:
      * The maze is represented as a list of Cells
      * The Cells can have up to 4 walls and 4 borders
      */
-    Maze(unsigned int width, unsigned int height);
+    explicit Maze(unsigned int width, unsigned int height)
+    :_width(width),_height(height),
+    _map(width*height,MAZE_WALL_ALL){depthFirstSearchAlgorithm();}
+    Maze(const Maze& maze):
+    _width(maze._width),_height(maze._height),_map(maze._map){}
+    
     virtual ~Maze(){}
     
-    unsigned int getWidth() const{return _width;}
-    unsigned int getHeight() const{return _height;}
+    virtual unsigned int getWidth() const{return _width;}
+    virtual unsigned int getHeight() const{return _height;}
     
-    Cell& getCellAt(unsigned int x,unsigned int y){
+    virtual unsigned int getAmountOfCells() const{return _width*_height;}
+    
+    virtual Cell& getCellAt(unsigned int x,unsigned int y){
         return _map.at(coordToPos(x,y));
     }
-    Cell getCellAt(unsigned int x,unsigned int y) const{
+    virtual Cell getCellAt(unsigned int x,unsigned int y) const{
         return _map.at(coordToPos(x,y));
     }
-    Cell& getCellByPos(unsigned int i){
+    virtual Cell& getCellByPos(unsigned int i){
         return _map.at(i);
     }
-    Cell getCellByPos(unsigned int i) const{
+    virtual Cell getCellByPos(unsigned int i) const{
         return _map.at(i);
     }
     static bool hasWallN(Cell c){return (c & MAZE_WALL_NORTH)==MAZE_WALL_NORTH;}
@@ -62,25 +69,25 @@ public:
     static bool hasBorderS(Cell c){return (c & MAZE_BORDER_SOUTH)==MAZE_BORDER_SOUTH;}
     static bool hasBorderW(Cell c){return (c & MAZE_BORDER_WEST)==MAZE_BORDER_WEST;}
     
-    unsigned int coordToPos(unsigned int x,unsigned int y) const{return (y*_width)+x;}
-    unsigned int posToCoordX(unsigned int pos) const{return pos%_width;}
-    unsigned int posToCoordY(unsigned int pos) const{return pos/_width;}
+    virtual unsigned int coordToPos(unsigned int x,unsigned int y) const{return (y*_width)+x;}
+    virtual unsigned int posToCoordX(unsigned int pos) const{return pos%_width;}
+    virtual unsigned int posToCoordY(unsigned int pos) const{return pos/_width;}
     
-    int cellNPos(unsigned int pos) const{return (pos>=_width)?pos-_width:-1;}
-    int cellEPos(unsigned int pos) const{return ((pos%_width)<_width-1)?pos+1:-1;}
-    int cellSPos(unsigned int pos) const{return ((pos/_width)<_height-1)?pos+_width:-1;}
-    int cellWPos(unsigned int pos) const{return ((pos%_width)>0)?pos-1:-1;}
+    virtual int cellNPos(unsigned int pos) const{return (pos>=_width)?pos-_width:-1;}
+    virtual int cellEPos(unsigned int pos) const{return ((pos%_width)<_width-1)?pos+1:-1;}
+    virtual int cellSPos(unsigned int pos) const{return ((pos/_width)<_height-1)?pos+_width:-1;}
+    virtual int cellWPos(unsigned int pos) const{return ((pos%_width)>0)?pos-1:-1;}
     
-    void printMaze();
+    virtual void printMaze();
 protected:
-    void reinitStructure(){
+    virtual void reinitStructure(){
         _map.resize(getWidth()*getHeight(),MAZE_WALL_ALL);
         depthFirstSearchAlgorithm();
     }
-    unsigned int fillNeighbours (unsigned int pos, unsigned int nbCells[4]) const;
-    void knockDownWall(unsigned int src,unsigned int dst);
-    void fillBorders(unsigned int pos);
-    void depthFirstSearchAlgorithm();
+    virtual unsigned int fillNeighbours (unsigned int pos, unsigned int nbCells[4]) const;
+    virtual void knockDownWall(unsigned int src,unsigned int dst);
+    virtual void fillBorders(unsigned int pos);
+    virtual void depthFirstSearchAlgorithm();
     
     const unsigned int _width;
     const unsigned int _height;

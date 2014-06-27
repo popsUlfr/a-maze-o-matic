@@ -4,10 +4,14 @@
 #include "ai.hpp"
 #include "termbox.hpp"
 
-class HumanAI: public AI{
+class AIHuman: public AI{
 public:
-    HumanAI(const Termbox& tb){}
+    AIHuman(const Termbox &tb):_tb(tb){}
+    virtual void run(const MazePlayground* mp,Actor* actor);
+    virtual void stop();
 protected:
+    virtual void keyHandler(const MazePlayground* mp,Actor* actor,uint16_t key);
+    
     const Termbox& _tb;
 };
 #endif

@@ -1,5 +1,5 @@
 CXX=clang++
-CXXFLAGS= -std=c++11 -Wall -Wextra -pedantic -g
+CXXFLAGS= -std=c++11 -Wall -Wextra -pedantic -g -static
 HEADERFLAGS= -I/home/popsulfr/work/termbox-out/include
 LIBFLAGS= -L/home/popsulfr/work/termbox-out/lib
 LIBS= -ltermbox
@@ -16,7 +16,7 @@ bin:
 	mkdir -p $(BINDIR)
 	
 $(BIN): bin $(OBJECTS)
-	$(CXX) $(LIBFLAGS) $(OBJECTS) $(LIBS) -o $(BINDIR)/$(BIN)
+	$(CXX) $(CXXFLAGS) $(LIBFLAGS) $(OBJECTS) $(LIBS) -o $(BINDIR)/$(BIN)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(HEADERFLAGS) -c $< -o $@
