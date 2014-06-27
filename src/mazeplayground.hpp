@@ -18,7 +18,8 @@ public:
     virtual unsigned int getPosStart() const{return _start;}
     virtual unsigned int getPosEnd() const{return _end;}
     
-    virtual void addActor(Actor *actor);
+    virtual void addActorStart(Actor &actor);
+    virtual void addActorEnd(Actor &actor);
     
     virtual bool collisionNCell(Maze::Cell c) const{
         return _maze.hasWallN(c) ||

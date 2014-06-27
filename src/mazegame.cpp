@@ -12,10 +12,10 @@ const int MazeGame::MinimalScreenSize=8;
 MazeGame::MazeGame(Termbox &tb):
 _tb(tb),
 _maze(nullptr),
-_mp(nullptr),
-_humanAI(/*tb*/),
-_player(&_humanAI){
+_mp(nullptr){
     _player.attachObserver(this);
+    attachObserver(&_player);
+    _opponent.attachObserver(this);
 }
 
 void MazeGame::deleteMaze(){
@@ -38,62 +38,46 @@ void MazeGame::createMaze(){
         _maze=new Maze(MazeDrawer::targetMazeWidth(width-(MazeMargin<<1)),
                        MazeDrawer::targetMazeHeight(height-(MazeMargin<<1)));
         _mp=new MazePlayground(*_maze);
-        _mp->addActor(&_player);
+        _mp->addActorStart(_player);
+        _mp->addActorEnd(_opponent);
         MazeDrawer::drawMaze(_tb,*_maze,MazeMargin,MazeMargin);
         MazeDrawer::drawEntryPoints(_tb,*_mp,MazeMargin,MazeMargin);
     }
     _tb.present();
 }
 
-void MazeGame::update(){
+void MazeGame::update(Actor& actor){
     MazeDrawer::clearCell(_tb,MazeMargin,MazeMargin,
-                          _maze->posToCoordX(_player.getPrevPosition()),
-                          _maze->posToCoordY(_player.getPrevPosition()));
+                          _maze->posToCoordX(actor.getPrevPosition()),
+                          _maze->posToCoordY(actor.getPrevPosition()));
     MazeDrawer::drawPlayer(_tb,MazeMargin,MazeMargin,
-                           _maze->posToCoordX(_player.getPosition()),
-                           _maze->posToCoordY(_player.getPosition())
-                          );
+                           _maze->posToCoordX(actor.getPosition()),
+                           _maze->posToCoordY(actor.getPosition())
+    );
     _tb.present();
 }
 
-void MazeGame::run(){
+void MazeGame::launchGame(){
     createMaze();
-    update();
-    _player.run(_mp);
+    update(_player);
+    update(_opponent);
+    _playerThread=std::thread(&Player::run,&_player,_mp);
+    _opponentThread=std::thread(&Opponent::run,&_opponent,_mp);
 }
 
-
-/*
-void MazeGame::keyHandler(uint16_t key){
-    switch(key){
-        case TB_KEY_SPACE:
-            drawScreen();
-            updatePlayer();
-            break;
-        case TB_KEY_ARROW_UP:
-            if(_mp->movePlayerN())
-                updatePlayer();
-            break;
-        case TB_KEY_ARROW_DOWN:
-            if(_mp->movePlayerS())
-                updatePlayer();
-            break;
-        case TB_KEY_ARROW_LEFT:
-            if(_mp->movePlayerW())
-                updatePlayer();
-            break;
-        case TB_KEY_ARROW_RIGHT:
-            if(_mp->movePlayerE())
-                updatePlayer();
-            break;
-        default: ;
-    }
+void MazeGame::stopGame(){
+    _player.stop();
+    _opponent.stop();
+    _playerThread.join();
+    _opponentThread.join();
 }
-
 
 void MazeGame::run(){
-    drawScreen();
-    updatePlayer();
+    launchGame();
+    eventListener();
+}
+
+void MazeGame::eventListener(){
     struct tb_event ev;
     bool cont=true;
     for(;cont;){
@@ -102,16 +86,19 @@ void MazeGame::run(){
             case TB_EVENT_KEY:
                 if(ev.key==TB_KEY_ESC)
                     cont=false;
+                else if(ev.key==TB_KEY_SPACE){
+                    stopGame();
+                    launchGame();
+                }
                 else
-                    keyHandler(ev.key);
+                    notifyObserver(ev);
                 break;
             case TB_EVENT_RESIZE:
-                drawScreen();
-                updatePlayer();
+                stopGame();
+                launchGame();
                 break;
             default: ;
         }
     }
+    stopGame();
 }
-*/
-

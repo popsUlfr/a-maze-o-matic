@@ -3,15 +3,21 @@
 
 #include "ai.hpp"
 #include "termbox.hpp"
+#include "observer.hpp"
 
-class AIHuman: public AI{
+class AIHuman: public AI,public Observer<struct tb_event&>{
 public:
-    AIHuman(const Termbox &tb):_tb(tb){}
+    AIHuman(){}
     virtual void run(const MazePlayground* mp,Actor* actor);
     virtual void stop();
-protected:
-    virtual void keyHandler(const MazePlayground* mp,Actor* actor,uint16_t key);
     
-    const Termbox& _tb;
+    virtual void update(struct tb_event& event);
+    
+    virtual void resetAI();
+protected:
+    virtual void keyHandler(uint16_t key);
+    
+    const MazePlayground* _mp;
+    Actor* _actor;
 };
 #endif

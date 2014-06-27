@@ -115,22 +115,21 @@ void AICpu::clearSolution(MazeSolution& ms,
 
 void AICpu::run(const MazePlayground* mp, Actor* actor){
     if(mp==nullptr || actor==nullptr) return;
-    bool found=false;
-    
+    _running.store(true);
     MazeSolution ms(mp->getMaze());
-    std::stack<unsigned int> posStack;
+    std::stack<unsigned int> _posStack;
     
     std::random_device rd;
     std::default_random_engine re(rd());
     
     unsigned int paths[4],fPaths[4];
     
-    for(;!found;){
+    for(;isRunning() && actor->getPosition()!=actor->getGoalPosition();){
         unsigned int nb;
         if((nb=fillPossiblePaths(*mp,actor->getPosition(),paths))>0
             && (nb=fillBacktrackPaths(ms,actor->getPosition(),nb,paths,fPaths))>0
         ){
-            posStack.push(actor->getPosition());
+            _posStack.push(actor->getPosition());
             unsigned int newpos;
             if(nb>1) {
                 std::uniform_int_distribution<unsigned int> uniDist(0,nb-1);
@@ -143,20 +142,21 @@ void AICpu::run(const MazePlayground* mp, Actor* actor){
             actor->setPosition(newpos);
         }
         else{
-            if(posStack.empty()) break;
-            clearSolution(ms,posStack.top(),actor->getPosition());
-            actor->setPosition(posStack.top());
-            posStack.pop();
+            if(_posStack.empty()) break;
+            clearSolution(ms,_posStack.top(),actor->getPosition());
+            actor->setPosition(_posStack.top());
+            _posStack.pop();
         }
-        actor->notifyObserver();
-        if(actor->getPosition()==mp->getPosEnd())
-            found=true;
-        std::this_thread::sleep_for(std::chrono::milliseconds(250));
+        actor->notifyObserver(*actor);
+        std::this_thread::sleep_for(_delay.load());
     }
     
 }
 
 void AICpu::stop(){
+    _running.store(false);
+}
 
+void AICpu::resetAI(){
 }
 

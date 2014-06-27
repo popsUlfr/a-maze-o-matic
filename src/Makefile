@@ -1,8 +1,9 @@
 CXX=clang++
-CXXFLAGS= -std=c++11 -Wall -Wextra -pedantic -g -static
+CXXFLAGS= -std=c++11 -Wall -Wextra -pedantic -ggdb
+LDFLAGS=
 HEADERFLAGS= -I/home/popsulfr/work/termbox-out/include
 LIBFLAGS= -L/home/popsulfr/work/termbox-out/lib
-LIBS= -ltermbox
+LIBS= -ltermbox -lpthread
 BIN=mytbproject
 BINDIR=../bin
 SOURCES=$(wildcard *.cpp)
@@ -16,7 +17,7 @@ bin:
 	mkdir -p $(BINDIR)
 	
 $(BIN): bin $(OBJECTS)
-	$(CXX) $(CXXFLAGS) $(LIBFLAGS) $(OBJECTS) $(LIBS) -o $(BINDIR)/$(BIN)
+	$(CXX) $(LDFLAGS) $(LIBFLAGS) $(OBJECTS) $(LIBS) -o $(BINDIR)/$(BIN)
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(HEADERFLAGS) -c $< -o $@

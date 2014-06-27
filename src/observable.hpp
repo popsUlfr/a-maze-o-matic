@@ -3,20 +3,21 @@
 
 #include "observer.hpp"
 
+template<class T>
 class Observable{
 public:
     Observable():_observer(nullptr){}
     virtual ~Observable(){}
     
-    virtual void attachObserver(Observer* observer){
+    virtual void attachObserver(Observer<T>* observer){
         _observer=observer;
     }
     
-    virtual void notifyObserver(){
+    virtual void notifyObserver(T& o){
         if(_observer!=nullptr)
-            _observer->update();
+            _observer->update(o);
     }
 protected:
-    Observer *_observer;
+    Observer<T> *_observer;
 };
 #endif

@@ -20,8 +20,12 @@ void MazePlayground::posRandomizer(){
     }
 }
 
-void MazePlayground::addActor(Actor* actor){
-    if(actor!=nullptr){
-        actor->resetPosition(getPosStart());
-    }
+void MazePlayground::addActorStart(Actor &actor){
+    actor.resetPosition(getPosStart());
+    actor.setGoalPosition(getPosEnd());
+}
+
+void MazePlayground::addActorEnd(Actor &actor){
+    actor.resetPosition(getPosEnd());
+    actor.setGoalPosition(getPosStart());
 }
