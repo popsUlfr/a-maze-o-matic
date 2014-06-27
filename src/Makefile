@@ -1,10 +1,10 @@
-CXX=clang++
+CXX=g++
 CXXFLAGS= -std=c++11 -Wall -Wextra -pedantic -ggdb
-LDFLAGS=
-HEADERFLAGS= -I/home/popsulfr/work/termbox-out/include
-LIBFLAGS= -L/home/popsulfr/work/termbox-out/lib
+HEADERFLAGS= -I/usr/local/include
+LIBFLAGS= -L/usr/local/lib
 LIBS= -ltermbox -lpthread
-BIN=mytbproject
+STATIC_LIBS= -static-libstdc++ -Wl,-Bstatic -ltermbox -Wl,-Bdynamic -lpthread
+BIN=amazeomatic
 BINDIR=../bin
 SOURCES=$(wildcard *.cpp)
 OBJECTS=$(SOURCES:.cpp=.o)
@@ -18,9 +18,12 @@ bin:
 	
 $(BIN): bin $(OBJECTS)
 	$(CXX) $(LDFLAGS) $(LIBFLAGS) $(OBJECTS) $(LIBS) -o $(BINDIR)/$(BIN)
+	
+$(BIN)_static: bin $(OBJECTS)
+	$(CXX) $(LDFLAGS) $(LIBFLAGS) $(OBJECTS) $(STATIC_LIBS) -o $(BINDIR)/$(BIN)_static
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $(HEADERFLAGS) -c $< -o $@
 	
 clean:
-	rm -f $(BINDIR)/$(BIN) $(OBJECTS)
+	rm -f $(BINDIR)/$(BIN) $(BINDIR)/$(BIN)_static $(OBJECTS)
